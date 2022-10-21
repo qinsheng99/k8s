@@ -299,10 +299,42 @@ func (r *Resource) Get(c *gin.Context) {
 		return
 	}
 
-	tools.Success(c, *get)
+	delete(get.Object, "metadata")
+
+	tools.Success(c, get.Object)
 }
 
 func (r *Resource) GetCrd(c *gin.Context) {
 	resource, _, _ := r.getResource()
 	tools.Success(c, resource)
+}
+
+func (r *Resource) UpdateResourceCrd(c *gin.Context) {
+	cli := client.GetDyna()
+	resource, err, _ := r.getResource()
+	if err != nil {
+		tools.Failure(c, err)
+		return
+	}
+	get, err := cli.Resource(resource).Namespace("default").Get(context.TODO(), c.Query("name"), metav1.GetOptions{})
+	if err != nil {
+		tools.Failure(c, err)
+		return
+	}
+
+	if sp, ok := get.Object["spec"]; ok {
+		if spc, ok := sp.(map[string]interface{}); ok {
+			spc["add"] = true
+			spc["recycleAfterSeconds"] = 100
+		}
+	}
+
+	_, err = cli.Resource(resource).Namespace("default").Update(context.TODO(), get, metav1.UpdateOptions{})
+	if err != nil {
+		tools.Failure(c, err)
+		return
+	}
+
+	tools.Success(c, "success")
+
 }

@@ -148,6 +148,9 @@ spec:
                 name:
                   description: resource name
                   type: string
+                add:
+                  description: add
+                  type: boolean
                 recycleAfterSeconds:
                   format: int64
                   type: integer

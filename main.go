@@ -42,7 +42,7 @@ func main() {
 	r.GET("/get-crd", s.Resource.GetCrd)
 	r.GET("/create-crd-source", s.Resource.CreateResourceCrd)
 	//r.GET("/update-crd-source-status", s.Resource.UpdateResourceCrdStatus)
-	//r.GET("/update-crd-source", s.Resource.UpdateResourceCrd)
+	r.GET("/update-crd-source", s.Resource.UpdateResourceCrd)
 
 	//r.GET("/demo", s.Resource.Demo)
 
