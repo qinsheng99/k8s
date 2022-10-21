@@ -1,23 +1,21 @@
-apiVersion: code.zjm.com/v1
-kind: CodeServer
+apiVersion: v1
+kind: Pod
 metadata:
-  name: codeserver-sample1
+  name: test
+  namespace: default
 spec:
-  image: ccr.ccs.tencentyun.com/kugo/demo:v5
-  name: test-server
-  envs:
-    - name: DB_USER
-      valueFrom:
-        secretKeyRef:
-          key: db-user
-          name: test-secret
-    - name: DB_PWD
-      valueFrom:
-        secretKeyRef:
-          key: db-password
-          name: test-secret
-  recycleAfterSeconds: 60
-  inactiveAfterSeconds: 0
-  add: true
-#    imagePullPolicy: Always
-#    restartPolicy: Never
+  containers:
+    - env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              key: db-user
+              name: test-secret
+        - name: DB_PWD
+          valueFrom:
+            secretKeyRef:
+              key: db-password
+              name: test-secret
+      image: ccr.ccs.tencentyun.com/kugo/demo:v5
+      imagePullPolicy: Always
+      name: test-k8s

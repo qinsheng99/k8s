@@ -1,7 +1,6 @@
 package client
 
 import (
-	"errors"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/discovery/cached/memory"
 	"k8s.io/client-go/dynamic"
@@ -41,9 +40,10 @@ func Init() (err error) {
 		log.Println(err)
 		return
 	}
-	initd()
-	if dyna == nil {
-		return errors.New("11")
+	dyna, err = dynamic.NewForConfig(k8sConfig)
+	if err != nil {
+		log.Println(err)
+		return
 	}
 
 	dis, err := discovery.NewDiscoveryClientForConfig(k8sConfig)
@@ -56,20 +56,6 @@ func Init() (err error) {
 	return nil
 }
 
-func initd() {
-	k8sConfig1, err := clientcmd.BuildConfigFromFlags("", getHome()+"/.kube/config")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	dyna, err = dynamic.NewForConfig(k8sConfig1)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-}
-
 func GetClient() *kubernetes.Clientset {
 	return k8sClient
 }
@@ -80,4 +66,8 @@ func GetDyna() dynamic.Interface {
 
 func GetrestMapper() *restmapper.DeferredDiscoveryRESTMapper {
 	return restm
+}
+
+func GetK8sConfig() *rest.Config {
+	return k8sConfig
 }

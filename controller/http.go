@@ -21,7 +21,7 @@ type Server struct {
 	Resource
 }
 
-// notParallel 非并行job
+// NotParallel  非并行job
 func (s *Server) NotParallel(c *gin.Context) {
 	cli := client.GetClient()
 	job := &v1.Job{

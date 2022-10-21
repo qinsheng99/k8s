@@ -22,7 +22,7 @@ func (Pod) getPodConf(secretName, namespace string) *corev1.Pod {
 	newPod := &corev1.Pod{}
 	newPod.TypeMeta = metav1.TypeMeta{
 		Kind:       "Pod",
-		APIVersion: "pod.crd/v1",
+		APIVersion: "v1",
 	}
 	name := "test" + strconv.Itoa(int(time.Now().Unix()))
 	newPod.ObjectMeta = metav1.ObjectMeta{
