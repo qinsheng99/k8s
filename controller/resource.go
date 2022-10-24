@@ -132,14 +132,14 @@ try:
 		goto try
 	} else {
 		if object.GetAPIVersion() == code.GetAPIVersion() {
-			metadata, ok := ParsingMap(code.Object, "metadata")
+			metadata, ok := tools.ParsingMap(code.Object, "metadata")
 			if !ok {
 				rls.ServerErroredFlag = true
 				return rls
 			}
 
-			name, ok := ParsingMapStr(metadata, "name")
-			if !ok {
+			name, nameok := tools.ParsingMapStr(metadata, "name")
+			if !nameok {
 				rls.ServerErroredFlag = true
 				return rls
 			}
@@ -149,83 +149,83 @@ try:
 				return rls
 			}
 
-			status, ok := ParsingMap(code.Object, "statsus")
-			if !ok {
+			status, statusok := tools.ParsingMap(code.Object, "statsus")
+			if !statusok {
 				return rls
 			}
 
-			conditions, ok := ParsingMapSlice(status, "condition")
-			if !ok {
+			conditions, conditionok := tools.ParsingMapSlice(status, "condition")
+			if !conditionok {
 				return rls
 			}
 
 			for _, condition := range conditions {
 				cond := condition.(map[string]interface{})
-				typ, ok := ParsingMapStr(cond, "type")
-				if !ok {
+				typ, typeok := tools.ParsingMapStr(cond, "type")
+				if !typeok {
 					continue
 				}
 
 				switch typ {
 				case "ServerCreated": //means the code server has been accepted by the system.
-					create, ok := ParsingMapStr(cond, "status")
-					if ok && create == "True" {
+					create, createok := tools.ParsingMapStr(cond, "status")
+					if createok && create == "True" {
 						rls.ServerCreatedFlag = true
 					}
-					lastTransitionTime, ok := ParsingMapStr(cond, "lastTransitionTime")
-					if ok {
+					lastTransitionTime, createtimeok := tools.ParsingMapStr(cond, "lastTransitionTime")
+					if createtimeok {
 						rls.ServerCreatedTime = lastTransitionTime
 					}
 				case "ServerReady": //means the code server has been ready for usage.
-					ready, ok := ParsingMapStr(cond, "status")
-					if ok && ready == "True" {
+					ready, readyok := tools.ParsingMapStr(cond, "status")
+					if readyok && ready == "True" {
 						rls.ServerReadyFlag = true
 					}
-					lastTransitionTime, ok := ParsingMapStr(cond, "lastTransitionTime")
-					if ok {
+					lastTransitionTime, timeok := tools.ParsingMapStr(cond, "lastTransitionTime")
+					if timeok {
 						rls.ServerReadyTime = lastTransitionTime
 					}
-					message, ok := ParsingMap(cond, "message")
-					if ok {
-						instanceEndpoint, ok := ParsingMapStr(message, "instanceEndpoint")
-						if ok {
+					message, messageok := tools.ParsingMap(cond, "message")
+					if messageok {
+						instanceEndpoint, pointok := tools.ParsingMapStr(message, "instanceEndpoint")
+						if pointok {
 							rls.InstanceEndpoint = instanceEndpoint
 						}
 					}
 				case "ServerBound": //means the code server has been bound to user.
-					bound, ok := ParsingMapStr(cond, "status")
-					if ok && bound == "True" {
+					bound, boundok := tools.ParsingMapStr(cond, "status")
+					if boundok && bound == "True" {
 						rls.ServerBoundFlag = true
 					}
-					lastTransitionTime, ok := ParsingMapStr(cond, "lastTransitionTime")
-					if ok {
+					lastTransitionTime, boundtimeok := tools.ParsingMapStr(cond, "lastTransitionTime")
+					if boundtimeok {
 						rls.ServerBoundTime = lastTransitionTime
 					}
 				case "ServerRecycled": //means the code server has been recycled totally.
-					recycled, ok := ParsingMapStr(cond, "status")
-					if ok && recycled == "True" {
+					recycled, recycleok := tools.ParsingMapStr(cond, "status")
+					if recycleok && recycled == "True" {
 						rls.ServerRecycledFlag = true
 					}
-					lastTransitionTime, ok := ParsingMapStr(cond, "lastTransitionTime")
-					if ok {
+					lastTransitionTime, recycletimeok := tools.ParsingMapStr(cond, "lastTransitionTime")
+					if recycletimeok {
 						rls.ServerRecycledTime = lastTransitionTime
 					}
 				case "ServerInactive": //means the code server will be marked inactive if `InactiveAfterSeconds` elapsed
-					inactive, ok := ParsingMapStr(cond, "status")
-					if ok && inactive == "True" {
+					inactive, inactiveok := tools.ParsingMapStr(cond, "status")
+					if inactiveok && inactive == "True" {
 						rls.ServerInactiveFlag = true
 					}
-					lastTransitionTime, ok := ParsingMapStr(cond, "lastTransitionTime")
-					if ok {
+					lastTransitionTime, inactivetimeok := tools.ParsingMapStr(cond, "lastTransitionTime")
+					if inactivetimeok {
 						rls.ServerInactiveTime = lastTransitionTime
 					}
 				case "ServerErrored": //means failed to reconcile code server.
-					bound, ok := ParsingMapStr(cond, "status")
-					if ok && bound == "True" {
+					bound, errorok := tools.ParsingMapStr(cond, "status")
+					if errorok && bound == "True" {
 						rls.ServerBoundFlag = true
 					}
-					lastTransitionTime, ok := ParsingMapStr(cond, "lastTransitionTime")
-					if ok {
+					lastTransitionTime, errortimeok := tools.ParsingMapStr(cond, "lastTransitionTime")
+					if errortimeok {
 						rls.ServerBoundTime = lastTransitionTime
 					}
 				}
@@ -233,30 +233,6 @@ try:
 		}
 	}
 	return rls
-}
-
-func ParsingMap(mapData map[string]interface{}, key string) (map[string]interface{}, bool) {
-	if value, ok := mapData[key]; ok {
-		data := value.(map[string]interface{})
-		return data, true
-	}
-	return nil, false
-}
-
-func ParsingMapStr(mapData map[string]interface{}, key string) (string, bool) {
-	if value, ok := mapData[key]; ok {
-		data := value.(string)
-		return data, true
-	}
-	return "", false
-}
-
-func ParsingMapSlice(mapData map[string]interface{}, key string) ([]interface{}, bool) {
-	if value, ok := mapData[key]; ok {
-		data := value.([]interface{})
-		return data, true
-	}
-	return nil, false
 }
 
 func (r *Resource) Get(c *gin.Context) {

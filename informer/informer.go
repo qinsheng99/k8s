@@ -16,8 +16,8 @@ import (
 	"time"
 )
 
-func NewListen(res *kubernetes.Clientset, c *rest.Config, dym dynamic.Interface, resource schema.GroupVersionResource, n string) ListenInter {
-	return &Listen{res: res, wg: &sync.WaitGroup{}, mux: &sync.Mutex{}, config: c, dym: dym, resource: resource, namespace: n}
+func NewListen(res *kubernetes.Clientset, c *rest.Config, dym dynamic.Interface, resource schema.GroupVersionResource) ListenInter {
+	return &Listen{res: res, wg: &sync.WaitGroup{}, mux: &sync.Mutex{}, config: c, dym: dym, resource: resource}
 }
 
 type ListenInter interface {
@@ -25,14 +25,13 @@ type ListenInter interface {
 }
 
 type Listen struct {
-	wg        *sync.WaitGroup
-	res       *kubernetes.Clientset
-	resync    time.Duration
-	mux       *sync.Mutex
-	config    *rest.Config
-	dym       dynamic.Interface
-	resource  schema.GroupVersionResource
-	namespace string
+	wg       *sync.WaitGroup
+	res      *kubernetes.Clientset
+	resync   time.Duration
+	mux      *sync.Mutex
+	config   *rest.Config
+	dym      dynamic.Interface
+	resource schema.GroupVersionResource
 }
 
 func (l *Listen) ListenResource() {
@@ -101,7 +100,7 @@ func (l *Listen) crdConfig() cache.SharedIndexInformer {
 }
 
 func (l *Listen) print(key string) {
-	_, name, err := cache.SplitMetaNamespaceKey(key)
+	namespace, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		log.Println("key err: ", err.Error())
 		return
@@ -109,7 +108,7 @@ func (l *Listen) print(key string) {
 	var n int64
 	var data *unstructured.Unstructured
 	for {
-		data, err = l.dym.Resource(l.resource).Namespace(l.namespace).Get(context.TODO(), name, metav1.GetOptions{})
+		data, err = l.dym.Resource(l.resource).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 		if err != nil {
 			n++
 			time.Sleep(500 * time.Millisecond)

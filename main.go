@@ -31,7 +31,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	listen := informer.NewListen(client.GetClient(), client.GetK8sConfig(), client.GetDyna(), resource, "default")
+	listen := informer.NewListen(client.GetClient(), client.GetK8sConfig(), client.GetDyna(), resource)
 	go listen.ListenResource()
 
 	err = r.Run(":8088")
