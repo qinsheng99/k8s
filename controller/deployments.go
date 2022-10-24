@@ -77,7 +77,7 @@ func (d *Deployments) getDeploymentConf(name, namespace, secretName string) *v1.
 					{
 						ImagePullPolicy: corev1.PullAlways,
 						Name:            "test-server",
-						Image:           "ccr.ccs.tencentyun.com/kugo/demo:v2",
+						Image:           "ccr.ccs.tencentyun.com/kugo/demo:v5",
 						Env: []corev1.EnvVar{
 							{
 								Name: "DB_USER",
@@ -123,6 +123,22 @@ func (d *Deployments) CreateDeployments(c *gin.Context) {
 	secretName := c.Query("secret")
 	name := c.Query("name")
 	deployment, err := cli.AppsV1().Deployments(namespace).Create(context.TODO(), d.getDeploymentConf(name, namespace, secretName), metav1.CreateOptions{})
+	if err != nil {
+		tools.Failure(c, err)
+		return
+	}
+
+	tools.Success(c, deployment)
+}
+
+func (d *Deployments) UpdateDeployments(c *gin.Context) {
+	cli := client.GetClient()
+	namespace := c.DefaultQuery("namespace", "default")
+	secretName := c.Query("secret")
+	name := c.Query("name")
+	up := d.getDeploymentConf(name, namespace, secretName)
+	up.Spec.Replicas = d.int32ptr(3)
+	deployment, err := cli.AppsV1().Deployments(namespace).Update(context.TODO(), up, metav1.UpdateOptions{})
 	if err != nil {
 		tools.Failure(c, err)
 		return

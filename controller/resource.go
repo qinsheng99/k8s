@@ -304,9 +304,8 @@ func (r *Resource) Get(c *gin.Context) {
 	tools.Success(c, get.Object)
 }
 
-func (r *Resource) GetCrd(c *gin.Context) {
-	resource, _, _ := r.getResource()
-	tools.Success(c, resource)
+func (r *Resource) GetCrd() (schema.GroupVersionResource, error, *unstructured.Unstructured) {
+	return r.getResource()
 }
 
 func (r *Resource) UpdateResourceCrd(c *gin.Context) {

@@ -1,7 +1,7 @@
 apiVersion: code.zjm.com/v1
 kind: CodeServer
 metadata:
-  name: codeserver-sample1
+  name: codeserver-sample
 spec:
   image: ccr.ccs.tencentyun.com/kugo/demo:v5
   name: test-server
@@ -18,6 +18,6 @@ spec:
           name: test-secret
   recycleAfterSeconds: 60
   inactiveAfterSeconds: 0
-  add: true
+  add: false
 #    imagePullPolicy: Always
 #    restartPolicy: Never

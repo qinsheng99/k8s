@@ -5,8 +5,7 @@ import (
 	"k8s-demo/controller"
 )
 
-func Route(r *gin.Engine) {
-	s := controller.Server{}
+func Route(r *gin.Engine, s controller.Server) {
 
 	r.GET("/delete-job", s.DeleteJob)
 
@@ -27,9 +26,9 @@ func Route(r *gin.Engine) {
 	r.GET("/get-deployment", s.Deployments.GetDeployments)
 	r.GET("/delete-deployment", s.Deployments.DeleteDeployments)
 	r.GET("/create-deployment", s.Deployments.CreateDeployments)
+	r.GET("/update-deployment", s.Deployments.UpdateDeployments)
 
 	r.GET("/crd-list", s.Resource.Get)
-	r.GET("/get-crd", s.Resource.GetCrd)
 	r.GET("/create-crd-source", s.Resource.CreateResourceCrd)
 	r.GET("/update-crd-source", s.Resource.UpdateResourceCrd)
 
