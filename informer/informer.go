@@ -2,6 +2,7 @@ package informer
 
 import (
 	"context"
+	"k8s-demo/tools"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -64,6 +65,7 @@ func (l *Listen) Update(oldObj, newObj interface{}) {
 		log.Println("update func err: ", err.Error())
 	}
 	log.Println("update func key: ", key)
+	go l.print(key)
 }
 
 func (l *Listen) Delete(obj interface{}) {
@@ -80,7 +82,6 @@ func (l *Listen) Add(obj interface{}) {
 		log.Println("add func err: ", err.Error())
 	}
 	log.Println("add func key: ", key)
-	go l.print(key)
 }
 
 func (l *Listen) crdConfig() cache.SharedIndexInformer {
@@ -100,6 +101,7 @@ func (l *Listen) crdConfig() cache.SharedIndexInformer {
 }
 
 func (l *Listen) print(key string) {
+	time.Sleep(3 * time.Second)
 	namespace, name, err := cache.SplitMetaNamespaceKey(key)
 	if err != nil {
 		log.Println("key err: ", err.Error())
@@ -120,8 +122,23 @@ func (l *Listen) print(key string) {
 			return
 		}
 	}
+	delete(data.Object, "metadata")
 
-	log.Println(data.GetName())
-	log.Println(data.GetUID())
-	log.Println(data.Object["spec"].(map[string]interface{})["image"])
+	status, statusok := tools.ParsingMap(data.Object, "status")
+	if !statusok {
+		return
+	}
+
+	conditions, conditionok := tools.ParsingMapSlice(status, "conditions")
+	if !conditionok {
+		return
+	}
+
+	for _, condition := range conditions {
+		cond := condition.(map[string]interface{})
+		log.Println(tools.ParsingMapStr(cond, "type"))
+		log.Println(tools.ParsingMapStr(cond, "status"))
+		log.Println(tools.ParsingMapStr(cond, "reason"))
+		log.Println("------")
+	}
 }

@@ -149,12 +149,12 @@ try:
 				return rls
 			}
 
-			status, statusok := tools.ParsingMap(code.Object, "statsus")
+			status, statusok := tools.ParsingMap(code.Object, "status")
 			if !statusok {
 				return rls
 			}
 
-			conditions, conditionok := tools.ParsingMapSlice(status, "condition")
+			conditions, conditionok := tools.ParsingMapSlice(status, "conditions")
 			if !conditionok {
 				return rls
 			}
