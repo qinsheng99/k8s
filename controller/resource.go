@@ -3,9 +3,11 @@ package controller
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/qinsheng99/crdcode/api/v1"
 	"io"
 	"io/ioutil"
 	"k8s-demo/client"
@@ -275,9 +277,20 @@ func (r *Resource) Get(c *gin.Context) {
 		return
 	}
 
-	delete(get.Object, "metadata")
+	marshal, err := json.Marshal(get.Object)
+	if err != nil {
+		tools.Failure(c, err)
+		return
+	}
 
-	tools.Success(c, get.Object)
+	var res v1.CodeServer
+	err = json.Unmarshal(marshal, &res)
+	if err != nil {
+		tools.Failure(c, err)
+		return
+	}
+
+	tools.Success(c, res)
 }
 
 func (r *Resource) GetCrd() (schema.GroupVersionResource, error, *unstructured.Unstructured) {
