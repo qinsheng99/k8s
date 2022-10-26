@@ -33,8 +33,8 @@ type ResListStatus struct {
 	ServerBoundTime    string
 	ServerInactiveTime string
 	ServerRecycledTime string
+	ServerErroredTime  string
 	InstanceEndpoint   string
-	ErrorInfo          string
 }
 
 func (r *Resource) resource() (kind *schema.GroupVersionKind, err error, _ *unstructured.Unstructured) {
@@ -224,11 +224,11 @@ try:
 				case "ServerErrored": //means failed to reconcile code server.
 					bound, errorok := tools.ParsingMapStr(cond, "status")
 					if errorok && bound == "True" {
-						rls.ServerBoundFlag = true
+						rls.ServerErroredFlag = true
 					}
 					lastTransitionTime, errortimeok := tools.ParsingMapStr(cond, "lastTransitionTime")
 					if errortimeok {
-						rls.ServerBoundTime = lastTransitionTime
+						rls.ServerErroredTime = lastTransitionTime
 					}
 				}
 			}
@@ -237,6 +237,85 @@ try:
 	return rls
 }
 
+func (r *Resource) newValidation(code *unstructured.Unstructured, dr dynamic.ResourceInterface, object *unstructured.Unstructured) ResListStatus {
+	var (
+		err error
+		num int
+		bys []byte
+	)
+
+try:
+	rls := ResListStatus{}
+	code, err = dr.Get(context.TODO(), code.GetName(), metav1.GetOptions{})
+	if err != nil {
+		num++
+		if num >= 10 {
+			err = dr.Delete(context.TODO(), code.GetName(), metav1.DeleteOptions{})
+			rls.ServerErroredFlag = true
+		}
+		goto try
+	} else {
+		if object.GetAPIVersion() == code.GetAPIVersion() {
+			bys, err = json.Marshal(code.Object)
+			if err != nil {
+				goto Error
+			}
+
+			var res v1.CodeServer
+			err = json.Unmarshal(bys, &res)
+			if err != nil {
+				goto Error
+			}
+			if res.ObjectMeta.Name != object.GetName() {
+				goto Error
+			}
+
+			if len(res.Status.Conditions) > 0 {
+				for _, condition := range res.Status.Conditions {
+					switch condition.Type {
+					case v1.ServerCreated: //means the code server has been accepted by the system.
+						if condition.Status == corev1.ConditionTrue {
+							rls.ServerCreatedFlag = true
+						}
+						rls.ServerCreatedTime = condition.LastTransitionTime.String()
+					case v1.ServerReady: //means the code server has been ready for usage.
+						if condition.Status == corev1.ConditionTrue {
+							rls.ServerReadyFlag = true
+						}
+						rls.ServerReadyTime = condition.LastTransitionTime.String()
+						rls.InstanceEndpoint = condition.Message["instanceEndpoint"]
+					case v1.ServerBound: //means the code server has been bound to user.
+						if condition.Status == corev1.ConditionTrue {
+							rls.ServerBoundFlag = true
+						}
+						rls.ServerBoundTime = condition.LastTransitionTime.String()
+					case v1.ServerRecycled: //means the code server has been recycled totally.
+						if condition.Status == corev1.ConditionTrue {
+							rls.ServerRecycledFlag = true
+						}
+						rls.ServerRecycledTime = condition.LastTransitionTime.String()
+					case v1.ServerInactive: //means the code server will be marked inactive if `InactiveAfterSeconds` elapsed
+						if condition.Status == corev1.ConditionTrue {
+							rls.ServerInactiveFlag = true
+						}
+						rls.ServerInactiveTime = condition.LastTransitionTime.String()
+					case v1.ServerErrored: //means failed to reconcile code server.
+						if condition.Status == corev1.ConditionTrue {
+							rls.ServerErroredFlag = true
+						}
+						rls.ServerErroredTime = condition.LastTransitionTime.String()
+					}
+				}
+			}
+			goto True
+		}
+	}
+Error:
+	rls.ServerErroredFlag = true
+	return rls
+True:
+	return rls
+}
 func (r *Resource) Get(c *gin.Context) {
 	cli := client.GetDyna()
 	resource, err, _ := r.getResource()
