@@ -39,7 +39,7 @@ type ResListStatus struct {
 
 func (r *Resource) resource() (kind *schema.GroupVersionKind, err error, _ *unstructured.Unstructured) {
 	var yamldata []byte
-	yamldata, err = ioutil.ReadFile("crd-resource.yaml")
+	yamldata, err = ioutil.ReadFile("yaml/crd-resource.yaml")
 	if err != nil {
 		return nil, err, nil
 	}
