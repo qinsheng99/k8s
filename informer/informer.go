@@ -2,13 +2,14 @@ package informer
 
 import (
 	"context"
-	"k8s-demo/tools"
+	v1 "github.com/qinsheng99/crdcode/api/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
@@ -65,7 +66,7 @@ func (l *Listen) Update(oldObj, newObj interface{}) {
 		log.Println("update func err: ", err.Error())
 	}
 	log.Println("update func key: ", key)
-	go l.print(key)
+	go l.print(newObj)
 }
 
 func (l *Listen) Delete(obj interface{}) {
@@ -100,45 +101,28 @@ func (l *Listen) crdConfig() cache.SharedIndexInformer {
 	)
 }
 
-func (l *Listen) print(key string) {
-	time.Sleep(3 * time.Second)
-	namespace, name, err := cache.SplitMetaNamespaceKey(key)
-	if err != nil {
-		log.Println("key err: ", err.Error())
-		return
-	}
-	var n int64
+func (l *Listen) print(obj interface{}) {
 	var data *unstructured.Unstructured
-	for {
-		data, err = l.dym.Resource(l.resource).Namespace(namespace).Get(context.TODO(), name, metav1.GetOptions{})
-		if err != nil {
-			n++
-			time.Sleep(500 * time.Millisecond)
-		} else {
-			break
-		}
-		if n == 10 {
-			log.Println("get crd resource err: ", err.Error())
-			return
-		}
-	}
-	delete(data.Object, "metadata")
-
-	status, statusok := tools.ParsingMap(data.Object, "status")
-	if !statusok {
+	switch code := obj.(type) {
+	case *unstructured.Unstructured:
+		data = code
+	default:
 		return
 	}
 
-	conditions, conditionok := tools.ParsingMapSlice(status, "conditions")
-	if !conditionok {
+	if data == nil {
 		return
 	}
-
-	for _, condition := range conditions {
-		cond := condition.(map[string]interface{})
-		log.Println(tools.ParsingMapStr(cond, "type"))
-		log.Println(tools.ParsingMapStr(cond, "status"))
-		log.Println(tools.ParsingMapStr(cond, "reason"))
+	// TODO unmarshal
+	var code v1.CodeServer
+	for _, condition := range code.Status.Conditions {
+		log.Println(condition.Type)
+		log.Println(condition.Status)
 		log.Println("------")
 	}
+}
+
+func (l *Listen) infor() {
+	inforFac := informers.NewSharedInformerFactory(l.res, 0)
+	inforFac.Core().V1().Pods().Informer().AddEventHandler(nil)
 }

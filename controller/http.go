@@ -19,6 +19,7 @@ type Server struct {
 	NameSpace
 	Project
 	Resource
+	Service
 }
 
 // NotParallel  非并行job
