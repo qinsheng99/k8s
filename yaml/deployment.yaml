@@ -1,7 +1,8 @@
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: test-deployment
+  namespace: default
   labels:
     app: test-deployment
 #  namespace: api-cve
@@ -30,3 +31,5 @@ spec:
                 secretKeyRef:
                   name: test-secret
                   key: db-password
+          ports:
+            - containerPort: 8080

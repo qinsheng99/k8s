@@ -98,6 +98,11 @@ func (d *Deployments) getDeploymentConf(name, namespace, secretName string) *v1.
 								},
 							},
 						},
+						Ports: []corev1.ContainerPort{
+							{
+								ContainerPort: 8080,
+							},
+						},
 					},
 				},
 			},
