@@ -31,6 +31,7 @@ func Route(r *gin.Engine, s controller.Server) {
 	r.GET("/crd-list", s.Resource.Get)
 	r.GET("/create-crd-source", s.Resource.CreateResourceCrd)
 	r.GET("/update-crd-source", s.Resource.UpdateResourceCrd)
+	r.GET("/get-crd", s.Resource.Crd)
 
 	r.GET("/not-parallel", s.NotParallel)
 }

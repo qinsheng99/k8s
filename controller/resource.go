@@ -18,6 +18,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/client-go/dynamic"
+	"text/template"
 )
 
 type Resource struct{}
@@ -39,12 +40,28 @@ type ResListStatus struct {
 
 func (r *Resource) resource() (kind *schema.GroupVersionKind, err error, _ *unstructured.Unstructured) {
 	var yamldata []byte
-	yamldata, err = ioutil.ReadFile("yaml/crd-resource.yaml")
+	yamldata, err = ioutil.ReadFile("tmpl/crd.tmpl")
+	if err != nil {
+		return nil, err, nil
+	}
+
+	parse, err := template.New("resource").Parse(string(yamldata))
+	if err != nil {
+		return nil, err, nil
+	}
+
+	var data = struct {
+		Group   string
+		Version string
+	}{"code.zjm.com", "v1"}
+
+	var buf bytes.Buffer
+	err = parse.Execute(&buf, data)
 	if err != nil {
 		return nil, err, nil
 	}
 	obj := &unstructured.Unstructured{}
-	_, kind, err = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme).Decode(yamldata, nil, obj)
+	_, kind, err = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme).Decode(buf.Bytes(), nil, obj)
 	if err != nil {
 		return nil, err, nil
 	}
@@ -370,6 +387,18 @@ func (r *Resource) Get(c *gin.Context) {
 	}
 
 	tools.Success(c, res)
+}
+
+func (r *Resource) Crd(c *gin.Context) {
+	a, err, b := r.GetCrd()
+	if err != nil {
+		tools.Failure(c, err)
+		return
+	}
+	tools.Success(c, gin.H{
+		"a": a,
+		"b": b,
+	})
 }
 
 func (r *Resource) GetCrd() (schema.GroupVersionResource, error, *unstructured.Unstructured) {
