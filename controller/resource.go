@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/qinsheng99/crdcode/api/v1"
+	"github.com/qinsheng99/crd-code/api/v1"
 	"io"
 	"io/ioutil"
 	"k8s-demo/client"

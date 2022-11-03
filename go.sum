@@ -333,8 +333,8 @@ github.com/prometheus/procfs v0.7.3 h1:4jVXhlkAyzOScmCkXBTOLRLTz8EeU+eyjrwB/EPq0
 github.com/prometheus/procfs v0.7.3/go.mod h1:cz+aTbrPOrUb4q7XlbU9ygM+/jj0fzG6c1xBZuNvfVA=
 github.com/qinsheng99/codeserver v0.0.0-20221024033128-e437897ccb41 h1:lunQjXuo5HoYVWv3flJVepumys4Ns6KwHASyzfSIGw4=
 github.com/qinsheng99/codeserver v0.0.0-20221024033128-e437897ccb41/go.mod h1:Z1vl+22ab0ku780Zz8QlFlQ40hWHW1AKG1xn+wbe/Cs=
-github.com/qinsheng99/crdcode v0.0.2 h1:d2a7RhMdOy9/PdatuKAnxAF2I9QGrdkQjdmB7SqIgqE=
-github.com/qinsheng99/crdcode v0.0.2/go.mod h1:ZEzF2O9z60zM7tXsMJR95DjC6gAOp3ijbzduWLdNS8o=
+github.com/qinsheng99/crd-code v0.0.0-20221103032502-999180962808 h1:jhrY+/5INynDXfwncSwGL2q3Y0WBhAoOfLRrAL7VMqI=
+github.com/qinsheng99/crd-code v0.0.0-20221103032502-999180962808/go.mod h1:o2b9VbsskUvb+w7srEEINq1u2lr7sqD8hO4dZovVDsU=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.6.1/go.mod h1:xXDCJY+GAPziupqXw64V24skbSoqbTEfhy4qGm1nDQc=

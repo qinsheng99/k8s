@@ -2,7 +2,7 @@ package informer
 
 import (
 	"context"
-	v1 "github.com/qinsheng99/crdcode/api/v1"
+	v1 "github.com/qinsheng99/crd-code/api/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
